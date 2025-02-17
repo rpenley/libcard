@@ -12,9 +12,6 @@ OBJ_DIR = $(BUILD_DIR)/obj
 BIN_DIR = $(BUILD_DIR)/bin
 LIB_DIR = $(BUILD_DIR)/libcard
 
-# Games list (add more games as needed)
-GAMES = blackjack
-
 # Source files for libcard
 LIBCARD_SRC = $(LIBCARD_DIR)/libcard.c
 LIBCARD_OBJ = $(OBJ_DIR)/libcard.o
@@ -22,8 +19,11 @@ LIBCARD_OBJ = $(OBJ_DIR)/libcard.o
 # Create directories if they don't exist
 $(shell mkdir -p $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR))
 
+# List all game source files (currently looks in the games/ directory)
+GAME_SOURCES = $(wildcard $(GAMES_DIR)/*.c)
+
 # Default target: build all games
-all: $(GAMES:%=$(BIN_DIR)/%)
+all: $(GAME_SOURCES:$(GAMES_DIR)/%.c=$(BIN_DIR)/%)
 
 # Rule to build each game executable
 $(BIN_DIR)/%: $(GAMES_DIR)/%.c $(LIBCARD_OBJ)
@@ -42,4 +42,3 @@ clean:
 
 # Phony targets (don't create files named 'clean' or 'all')
 .PHONY: all clean
-
