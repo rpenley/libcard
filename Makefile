@@ -1,36 +1,38 @@
 # Compiler and flags
 CC = gcc
 CFLAGS = -Wall -g
+LIB_DIR = libcard
+GAME_DIR = games
+LIBRARY = libcard.a  # Static library name
 
-# Output library and executable names
-LIBRARY = liblibcard.a
-EXEC = main
+# Directories for object files
+OBJ_DIR = obj
+GAME_OBJ_DIR = $(OBJ_DIR)/games
 
-# Source and object files
-LIB_SRC = libcard.c
-LIB_OBJ = libcard.o
-MAIN_SRC = main.c
-MAIN_OBJ = main.o
+# Find all the C files in libcard and games directories
+LIBCARD_SRC = $(LIB_DIR)/libcard.c
+LIBCARD_OBJ = $(OBJ_DIR)/libcard.o
+GAME_SRC = $(wildcard $(GAME_DIR)/*.c)
+GAME_OBJ = $(GAME_SRC:$(GAME_DIR)/%.c=$(GAME_OBJ_DIR)/%.o)
 
 # Targets
-all: $(EXEC)
+all: $(LIBRARY) $(GAME_OBJ)
+	$(CC) $(GAME_OBJ) -L$(OBJ_DIR) -lcard -o games_executable
 
-# Build the executable
-$(EXEC): $(MAIN_OBJ) $(LIB_OBJ)
-	$(CC) $(CFLAGS) -o $(EXEC) $(MAIN_OBJ) $(LIB_OBJ)
+$(LIBRARY): $(LIBCARD_OBJ)
+	ar rcs $@ $^
 
-# Build the library
-$(LIBRARY): $(LIB_OBJ)
-	ar rcs $(LIBRARY) $(LIB_OBJ)
+$(GAME_OBJ_DIR)/%.o: $(GAME_DIR)/%.c | $(OBJ_DIR)/$(GAME_OBJ_DIR)
+	$(CC) $(CFLAGS) -I$(LIB_DIR) -c $< -o $@
 
-# Compile source files
-$(LIB_OBJ): libcard.c libcard.h
-	$(CC) $(CFLAGS) -c libcard.c
+$(OBJ_DIR)/$(GAME_OBJ_DIR):
+	mkdir -p $@
 
-$(MAIN_OBJ): main.c libcard.h
-	$(CC) $(CFLAGS) -c main.c
+$(OBJ_DIR):
+	mkdir -p $@
 
-# Clean up build files
 clean:
-	rm -f $(EXEC) $(LIBRARY) *.o
+	rm -rf $(OBJ_DIR) $(LIBRARY) games_executable
+
+.PHONY: all clean
 
